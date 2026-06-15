@@ -14,11 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
     pip config set global.trusted-host https://pypi.tuna.tsinghua.edu.cn
 
-# 安装 uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-# 配置 uv 使用国内镜像
-ENV UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+# 使用 pip 安装 uv (避免从 ghcr.io 拉取)
+RUN pip install uv
 
 # 复制依赖文件
 COPY pyproject.toml uv.lock* ./

@@ -19,8 +19,13 @@ RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
 # 复制源代码
 COPY . .
 
-# 构建
-RUN API_BASE_URL=http://backend:8000 pnpm build --registry https://registry.npmmirror.com
+# 复制环境变量文件到构建目录
+COPY .env* ./
+
+# 构建时使用环境变量
+ARG NEXT_PUBLIC_API_URL=http://backend:8000/api/v1
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+RUN pnpm build --registry https://registry.npmmirror.com
 
 # ==================== 生产镜像 ====================
 FROM registry.cn-hangzhou.aliyuncs.com/acs/node:20-alpine AS runner
