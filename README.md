@@ -1,6 +1,14 @@
 # Dahzah 一键部署指南
 
-基于 Docker Compose 的一键部署方案，包含后端、前端、数据库和 Nginx 反向代理。
+基于 Docker Compose 的一键部署方案，全程使用国内镜像源，适合中国大陆服务器。
+
+## 镜像源说明
+
+- **Docker 基础镜像**: 阿里云容器镜像服务
+- **Python 依赖**: 清华 PyPI 镜像
+- **Node.js 依赖**: 淘宝 npm 镜像
+
+无需额外配置 Docker daemon 镜像加速，所有资源均从国内获取。
 
 ## 系统要求
 
@@ -11,46 +19,38 @@
 
 ## 快速开始
 
-### 1. 克隆代码
+### 1. 一键克隆
 
 ```bash
-# 克隆后端
+git clone https://github.com/Mao-Tony/dahzah-deploy.git
+cd dahzah-deploy
+
+# 克隆后端代码
 git clone https://github.com/Mao-Tony/dazah-backend.git backend
 
-# 克隆前端
+# 克隆前端代码
 git clone https://github.com/Mao-Tony/dazah-frontend.git frontend
-
-# 进入部署目录
-cd dahzah-deploy
 ```
 
 ### 2. 配置环境变量
 
 ```bash
-# 复制环境变量模板
 cp .env.example .env
-
-# 编辑 .env 文件，填入你的配置
 nano .env
 ```
 
 必须配置项：
 - `SECRET_KEY` - 生成随机密钥
 - `POSTGRES_PASSWORD` - 数据库密码
-- `MINIMAX_API_KEY` - MiniMax AI API 密钥（用于 AI 识别功能）
+- `MINIMAX_API_KEY` - MiniMax AI API 密钥
 
 ### 3. 启动服务
 
 ```bash
-# 构建并启动所有服务
 docker-compose up -d
-
-# 查看服务状态
-docker-compose ps
-
-# 查看日志
-docker-compose logs -f
 ```
+
+构建过程会自动从国内镜像拉取，无需额外配置。
 
 ### 4. 访问应用
 
@@ -60,13 +60,13 @@ docker-compose logs -f
 
 ## 服务说明
 
-| 服务 | 端口 | 说明 |
+| 服务 | 端口 | 镜像 |
 |------|------|------|
-| Nginx | 80, 443 | 反向代理 |
-| Frontend | 3000 | Next.js 前端 |
-| Backend | 8000 | FastAPI 后端 |
-| PostgreSQL | 5432 | 数据库 |
-| Redis | 6379 | 缓存 |
+| Nginx | 80, 443 | 阿里云 acs/nginx:alpine |
+| Frontend | 3000 | 阿里云 acs/node:20-alpine |
+| Backend | 8000 | 阿里云 acs/python:3.12-slim |
+| PostgreSQL | 5432 | 阿里云 acs/postgres:17 |
+| Redis | 6379 | 阿里云 acs/redis:latest |
 
 ## 常用命令
 

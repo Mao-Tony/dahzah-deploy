@@ -1,23 +1,29 @@
 # ==================== 前端 Dockerfile ====================
-# 构建: docker build -t dahzah-frontend ./frontend
-# 运行: docker run -d -p 3000:3000 --env-file .env.local dahzah-frontend
+# 使用阿里云 Node 镜像 + 淘宝 npm 镜像
 
-FROM node:20-alpine AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/acs/node:20-alpine AS builder
 
 WORKDIR /app
 
-# 安装依赖
+# 配置淘宝 npm 镜像
+RUN npm config set registry https://registry.npmmirror.com && \
+    corepack enable && \
+    corepack prepare pnpm@latest --activate
+
+# 复制依赖文件
 COPY package.json pnpm-lock.yaml ./
-RUN corepack enable && pnpm install --frozen-lockfile
+
+# 使用国内镜像安装依赖
+RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
 
 # 复制源代码
 COPY . .
 
 # 构建
-RUN API_BASE_URL=http://backend:8000 pnpm build
+RUN API_BASE_URL=http://backend:8000 pnpm build --registry https://registry.npmmirror.com
 
 # ==================== 生产镜像 ====================
-FROM node:20-alpine AS runner
+FROM registry.cn-hangzhou.aliyuncs.com/acs/node:20-alpine AS runner
 
 WORKDIR /app
 

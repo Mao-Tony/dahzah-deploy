@@ -1,8 +1,7 @@
 # ==================== 后端 Dockerfile ====================
-# 构建: docker build -t dahzah-backend ./backend
-# 运行: docker run -d -p 8000:8000 --env-file .env dahzah-backend
+# 使用阿里云 Python 镜像 + 清华 PyPI 镜像
 
-FROM python:3.12-slim
+FROM registry.cn-hangzhou.aliyuncs.com/acs/python:3.12-slim
 
 WORKDIR /app
 
@@ -11,14 +10,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# 配置清华 PyPI 镜像
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+    pip config set global.trusted-host https://pypi.tuna.tsinghua.edu.cn
+
 # 安装 uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# 配置 uv 使用国内镜像
+ENV UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 复制依赖文件
 COPY pyproject.toml uv.lock* ./
 
 # 安装依赖
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 复制应用代码
 COPY . .
