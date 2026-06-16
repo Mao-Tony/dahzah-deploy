@@ -21,8 +21,8 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && 
 # 使用 pip 安装 uv
 RUN pip install uv
 
-# 克隆代码
-RUN git clone --branch ${BACKEND_BRANCH} --depth 1 ${BACKEND_REPO} /tmp/backend && \
+# 克隆代码（使用 GitHub 代理加速）
+RUN git clone --branch ${BACKEND_BRANCH} --depth 1 https://gh-proxy.org/${BACKEND_REPO#https://} /tmp/backend && \
     cp -r /tmp/backend/* /app/ && \
     rm -rf /tmp/backend
 

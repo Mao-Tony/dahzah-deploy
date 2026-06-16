@@ -18,8 +18,8 @@ RUN npm config set registry https://registry.npmmirror.com && \
 # 安装 git
 RUN apk add --no-cache git
 
-# 克隆代码
-RUN git clone --branch ${FRONTEND_BRANCH} --depth 1 ${FRONTEND_REPO} /tmp/frontend && \
+# 克隆代码（使用 GitHub 代理加速）
+RUN git clone --branch ${FRONTEND_BRANCH} --depth 1 https://gh-proxy.org/${FRONTEND_REPO#https://} /tmp/frontend && \
     cp -r /tmp/frontend/* /app/ && \
     rm -rf /tmp/frontend
 
