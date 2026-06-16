@@ -55,8 +55,13 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# 复制完整的 .next 构建产物（standalone 模式需要）
+# 复制完整的 .next 构建产物
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+
+# standalone 模式不会自动复制 static 目录，需要手动添加
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# 复制 public 目录
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 CMD ["node", "server.js"]
