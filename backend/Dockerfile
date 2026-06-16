@@ -5,7 +5,7 @@
 ARG BACKEND_REPO=https://github.com/Mao-Tony/dazah-backend.git
 ARG BACKEND_BRANCH=main
 
-FROM registry.cn-hangzhou.aliyuncs.com/acs/python:3.12-slim
+FROM docker.xuanyuan.me/library/python:3.12-slim
 
 WORKDIR /app
 

@@ -6,7 +6,7 @@ ARG FRONTEND_REPO=https://github.com/Mao-Tony/dazah-frontend.git
 ARG FRONTEND_BRANCH=main
 ARG NEXT_PUBLIC_API_URL=http://backend:8000/api/v1
 
-FROM registry.cn-hangzhou.aliyuncs.com/acs/node:20-alpine AS builder
+FROM docker.xuanyuan.me/library/node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
 RUN pnpm build --registry https://registry.npmmirror.com
 
 # ==================== 生产镜像 ====================
-FROM registry.cn-hangzhou.aliyuncs.com/acs/node:20-alpine AS runner
+FROM docker.xuanyuan.me/library/node:20-alpine AS runner
 
 WORKDIR /app
 

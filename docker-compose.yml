@@ -1,6 +1,6 @@
 version: '3.8'
 
-# 全程使用阿里云镜像加速，无需额外配置 Docker daemon
+# 使用国内镜像加速：docker.xuanyuan.me
 
 services:
   # ==================== 后端服务 ====================
@@ -64,9 +64,9 @@ services:
       - frontend-uploads:/app/public/uploads
     restart: unless-stopped
 
-  # ==================== 数据库 (阿里云) ====================
+  # ==================== 数据库 ====================
   db:
-    image: registry.cn-hangzhou.aliyuncs.com/acs/postgres:17
+    image: docker.xuanyuan.me/library/postgres:17
     container_name: dahzah-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -87,9 +87,9 @@ services:
         limits:
           memory: 1G
 
-  # ==================== Redis (阿里云) ====================
+  # ==================== Redis ====================
   redis:
-    image: registry.cn-hangzhou.aliyuncs.com/acs/redis:latest
+    image: docker.xuanyuan.me/library/redis:latest
     container_name: dahzah-redis
     command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
     volumes:
@@ -107,9 +107,9 @@ services:
         limits:
           memory: 256M
 
-  # ==================== Nginx 反向代理 (阿里云) ====================
+  # ==================== Nginx 反向代理 ====================
   nginx:
-    image: registry.cn-hangzhou.aliyuncs.com/acs/nginx:alpine
+    image: docker.xuanyuan.me/library/nginx:alpine
     container_name: dahzah-nginx
     ports:
       - "80:80"
