@@ -1,30 +1,33 @@
 # ==================== 后端 Dockerfile ====================
-# 使用阿里云 Python 镜像 + 清华 PyPI 镜像
+# 构建时自动从 GitHub 拉取代码
+# 支持私有仓库认证
+
+ARG BACKEND_REPO=https://github.com/Mao-Tony/dazah-backend.git
+ARG BACKEND_BRANCH=main
 
 FROM registry.cn-hangzhou.aliyuncs.com/acs/python:3.12-slim
 
 WORKDIR /app
 
-# 安装系统依赖
+# 安装系统依赖和 git
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
+    curl git \
     && rm -rf /var/lib/apt/lists/*
 
 # 配置清华 PyPI 镜像
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
     pip config set global.trusted-host https://pypi.tuna.tsinghua.edu.cn
 
-# 使用 pip 安装 uv (避免从 ghcr.io 拉取)
+# 使用 pip 安装 uv
 RUN pip install uv
 
-# 复制依赖文件
-COPY pyproject.toml uv.lock* ./
+# 克隆代码
+RUN git clone --branch ${BACKEND_BRANCH} --depth 1 ${BACKEND_REPO} /tmp/backend && \
+    cp -r /tmp/backend/* /app/ && \
+    rm -rf /tmp/backend
 
 # 安装依赖
 RUN uv sync --frozen --no-dev --index-url https://pypi.tuna.tsinghua.edu.cn/simple
-
-# 复制应用代码
-COPY . .
 
 # 创建上传和日志目录
 RUN mkdir -p /app/uploads /app/logs

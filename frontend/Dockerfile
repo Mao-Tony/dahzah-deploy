@@ -1,5 +1,10 @@
 # ==================== 前端 Dockerfile ====================
-# 使用阿里云 Node 镜像 + 淘宝 npm 镜像
+# 构建时自动从 GitHub 拉取代码
+# 支持私有仓库认证
+
+ARG FRONTEND_REPO=https://github.com/Mao-Tony/dazah-frontend.git
+ARG FRONTEND_BRANCH=main
+ARG NEXT_PUBLIC_API_URL=http://backend:8000/api/v1
 
 FROM registry.cn-hangzhou.aliyuncs.com/acs/node:20-alpine AS builder
 
@@ -10,21 +15,22 @@ RUN npm config set registry https://registry.npmmirror.com && \
     corepack enable && \
     corepack prepare pnpm@latest --activate
 
-# 复制依赖文件
-COPY package.json pnpm-lock.yaml ./
+# 安装 git
+RUN apk add --no-cache git
 
-# 使用国内镜像安装依赖
+# 克隆代码
+RUN git clone --branch ${FRONTEND_BRANCH} --depth 1 ${FRONTEND_REPO} /tmp/frontend && \
+    cp -r /tmp/frontend/* /app/ && \
+    rm -rf /tmp/frontend
+
+# 设置环境变量
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_USE_LOCAL=/api/v1
+
+# 安装依赖
 RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
 
-# 复制源代码
-COPY . .
-
-# 复制环境变量文件到构建目录
-COPY .env* ./
-
-# 构建时使用环境变量
-ARG NEXT_PUBLIC_API_URL=http://backend:8000/api/v1
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+# 构建
 RUN pnpm build --registry https://registry.npmmirror.com
 
 # ==================== 生产镜像 ====================

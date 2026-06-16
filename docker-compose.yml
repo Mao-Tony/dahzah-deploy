@@ -6,8 +6,11 @@ services:
   # ==================== 后端服务 ====================
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        BACKEND_REPO: ${BACKEND_REPO:-https://github.com/Mao-Tony/dazah-backend.git}
+        BACKEND_BRANCH: ${BACKEND_BRANCH:-main}
     container_name: dahzah-backend
     ports:
       - "8000:8000"
@@ -36,13 +39,6 @@ services:
       - backend-uploads:/app/uploads
       - backend-logs:/app/logs
     restart: unless-stopped
-    # 资源限制 (根据服务器配置调整)
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 512M
     command: >
       sh -c "uv run alembic upgrade head &&
              uv run uvicorn app.main:app --host 0.0.0.0 --port 8000"
@@ -50,9 +46,11 @@ services:
   # ==================== 前端服务 ====================
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
       args:
+        FRONTEND_REPO: ${FRONTEND_REPO:-https://github.com/Mao-Tony/dazah-frontend.git}
+        FRONTEND_BRANCH: ${FRONTEND_BRANCH:-main}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8000/api/v1}
     container_name: dahzah-frontend
     ports:
@@ -65,13 +63,6 @@ services:
     volumes:
       - frontend-uploads:/app/public/uploads
     restart: unless-stopped
-    # 资源限制 (根据服务器配置调整)
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 256M
 
   # ==================== 数据库 (阿里云) ====================
   db:
@@ -91,7 +82,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    # 资源限制
     deploy:
       resources:
         limits:
@@ -112,7 +102,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    # 资源限制
     deploy:
       resources:
         limits:

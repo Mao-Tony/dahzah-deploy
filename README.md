@@ -1,14 +1,12 @@
 # Dahzah 一键部署指南
 
-基于 Docker Compose 的一键部署方案，全程使用国内镜像源，适合中国大陆服务器。
+基于 Docker Compose 的一键部署方案，全程使用国内镜像源，构建时自动拉取代码。
 
-## 镜像源说明
+## 特性
 
-- **Docker 基础镜像**: 阿里云容器镜像服务
-- **Python 依赖**: 清华 PyPI 镜像
-- **Node.js 依赖**: 淘宝 npm 镜像
-
-无需额外配置 Docker daemon 镜像加速，所有资源均从国内获取。
+- **自动拉取代码**：构建时自动从 GitHub 克隆前后端代码
+- **国内镜像**：所有基础镜像和依赖来自国内源
+- **一键部署**：只需 Docker 一个环境
 
 ## 系统要求
 
@@ -19,17 +17,11 @@
 
 ## 快速开始
 
-### 1. 一键克隆
+### 1. 克隆部署配置
 
 ```bash
 git clone https://github.com/Mao-Tony/dahzah-deploy.git
 cd dahzah-deploy
-
-# 克隆后端代码
-git clone https://github.com/Mao-Tony/dazah-backend.git backend
-
-# 克隆前端代码
-git clone https://github.com/Mao-Tony/dazah-frontend.git frontend
 ```
 
 ### 2. 配置环境变量
@@ -42,19 +34,22 @@ nano .env
 必须配置项：
 - `SECRET_KEY` - 生成随机密钥
 - `POSTGRES_PASSWORD` - 数据库密码
-- `MINIMAX_API_KEY` - MiniMax AI API 密钥
+- `MINIMAX_API_KEY` - MiniMax AI API 密钥（可选）
 
-### 3. 启动服务
+### 3. 一键启动
 
 ```bash
 docker-compose up -d
 ```
 
-构建过程会自动从国内镜像拉取，无需额外配置。
+构建过程会自动：
+1. 从 GitHub 拉取前后端代码
+2. 从国内镜像安装依赖
+3. 构建并启动所有服务
 
 ### 4. 访问应用
 
-- 前端页面: http://localhost
+- 前端页面: http://localhost:3000
 - 后端 API: http://localhost:8000
 - API 文档: http://localhost:8000/docs
 
@@ -62,11 +57,11 @@ docker-compose up -d
 
 | 服务 | 端口 | 镜像 |
 |------|------|------|
-| Nginx | 80, 443 | 阿里云 acs/nginx:alpine |
 | Frontend | 3000 | 阿里云 acs/node:20-alpine |
 | Backend | 8000 | 阿里云 acs/python:3.12-slim |
 | PostgreSQL | 5432 | 阿里云 acs/postgres:17 |
 | Redis | 6379 | 阿里云 acs/redis:latest |
+| Nginx | 80, 443 | 阿里云 acs/nginx:alpine |
 
 ## 常用命令
 
@@ -93,6 +88,15 @@ docker-compose logs -f backend
 docker-compose exec backend uv run alembic upgrade head
 ```
 
+## 自定义代码仓库
+
+如需使用自己的代码仓库，修改 `.env`：
+
+```bash
+BACKEND_REPO=https://github.com/你的用户名/你的后端仓库.git
+FRONTEND_REPO=https://github.com/你的用户名/你的前端仓库.git
+```
+
 ## 数据持久化
 
 所有数据通过 Docker Volume 持久化：
@@ -100,16 +104,6 @@ docker-compose exec backend uv run alembic upgrade head
 - `redisdata` - Redis 数据
 - `backend-uploads` - 后端上传文件
 - `frontend-uploads` - 前端上传文件
-
-## SSL 配置 (可选)
-
-如需启用 HTTPS：
-
-1. 将 SSL 证书放入 `ssl/` 目录：
-   - `ssl/server.crt` - 证书
-   - `ssl/server.key` - 私钥
-
-2. 修改 `nginx.conf` 启用 HTTPS
 
 ## 故障排查
 
@@ -122,7 +116,7 @@ docker-compose logs <service-name>
 检查 `POSTGRES_USER` 和 `POSTGRES_PASSWORD` 是否正确
 
 ### 前端无法访问后端 API
-检查 `API_BASE_URL` 配置和 Nginx 代理配置
+检查 `NEXT_PUBLIC_API_URL` 配置
 
 ## License
 
